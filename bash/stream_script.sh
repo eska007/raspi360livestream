@@ -1,6 +1,7 @@
 #!/bin/bash
 
 modprobe bcm2835-v4l2 #open /dev/video0
+python /var/www/html/python/cv_image_process.py &
 export STREAMER_PATH=$HOME/mjpg-streamer/mjpg-streamer-experimental
 export LD_LIBRARY_PATH=$STREAMER_PATH
 
