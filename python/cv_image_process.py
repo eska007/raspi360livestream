@@ -25,7 +25,7 @@ def unwarp(img, xmap, ymap):
     result = Image(output, cv2image=True)
     return result
 
-def dewarp(img, Cx=332, Cy=220, R1x=388, R1y=220, R2x=443, R2y=220):
+def dewarp(img, Cx=332, Cy=220, R1x=388, R2x=443): # Default (640*480)
     R1 = R1x - Cx
     R2 = R2x - Cx
     #print(R1, R2) 
@@ -44,10 +44,10 @@ def dewarp(img, Cx=332, Cy=220, R1x=388, R1y=220, R2x=443, R2y=220):
     return result
 
 
-cam = Camera(0)
+cam = Camera(0, {"width": 1280, "height": 720})
 while(True):
     img = cam.getImage()
-    dewarp_img = dewarp(img)
+    dewarp_img = dewarp(img, 685, 315, 776, 883) # 1280*720
     dewarp_img.save("/var/www/html/files/stream.png")
     time.sleep(1)
 
