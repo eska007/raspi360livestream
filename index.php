@@ -79,13 +79,13 @@
 
 			$('#streaming').click(function(){
 				$('#response').text("Starting camera. Please wait..");
-				/**window.location = "http://210.117.31.104:10002/?action=stream"**/
+				/**window.location = "http://xxx.xxx.xx.xxx:xxxxx/?action=stream"**/
 				$.ajax({
 					type: 'Post',
 					url: 'stream_script.php',
 					success: function(data2){
 						$('#cam_container').show();
-						$('#cam_stream').attr('src', 'http://210.117.31.104:10002/?action=stream');
+						$('#cam_stream').attr('src', 'http://xxx.xxx.xx.xxx:xxxxx/?action=stream');
 						$('#response').text(data2);
 					}
 				});
