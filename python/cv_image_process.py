@@ -1,6 +1,8 @@
-from SimpleCV import *
-import numpy as np
 import cv2
+import numpy as np
+import os
+import Image
+import time
 # Must be enable v4l2 driver
 # modprobe bcm2835-v4l2 #/dev/video0
 
@@ -21,9 +23,7 @@ def buildMap(Ws,Hs,Wd,Hd,R1,R2,Cx,Cy):
     return map_x, map_y
 
 def unwarp(img, xmap, ymap):
-    output = cv2.remap(img.getNumpyCv2(), xmap, ymap, cv2.INTER_LINEAR) 
-    result = Image(output, cv2image=True)
-    return result
+    return cv2.remap(img, xmap, ymap, cv2.INTER_LINEAR) 
 
 def dewarp(img, Cx=332, Cy=220, R1x=388, R2x=443): # Default (640*480)
     R1 = R1x - Cx
@@ -33,8 +33,8 @@ def dewarp(img, Cx=332, Cy=220, R1x=388, R2x=443): # Default (640*480)
     Hd = R2 - R1
     
     # Size of Image
-    Ws = img.width
-    Hs = img.height
+    Ws = cap.get(cv2.CAP_PROP_FRAME_WIDTH)#img.width
+    Hs = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)#img.height
 
     # Building Map
     xmap, ymap = buildMap(Ws,Hs,Wd,Hd,R1,R2,Cx,Cy)
@@ -44,12 +44,34 @@ def dewarp(img, Cx=332, Cy=220, R1x=388, R2x=443): # Default (640*480)
     return result
 
 
-cam = Camera(0, {"width": 1280, "height": 720})
+def set_cv_frame_res(cap, x,y):
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, int(x))
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, int(y))
+    return str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+cap = cv2.VideoCapture(0)
+ws, hs = set_cv_frame_res(cap, 1280, 720)
+print ("Set frame resolution: " + ws + ',' + hs)
+#cam = Camera(0, {"width": 1280, "height": 720})
+ext = '.avi'
+codec = 'XVID' #OK
+# OPENCV 3.1.0
+fourcc = cv2.VideoWriter_fourcc(*codec)
+out = cv2.VideoWriter('/var/www/html/vid_files/' + codec + ext, fourcc, 1, (1244, 107)) # O.K
+filename = '/var/www/html/vid_files/stream.png'
 while(True):
-    img = cam.getImage()
-    dewarp_img = dewarp(img, 685, 315, 776, 883) # 1280*720
-    dewarp_img.save("/var/www/html/files/stream.png")
-    time.sleep(1)
+    ret, frame = cap.read()
+    if ret:
+        dewarp_img = dewarp(frame, 685, 315, 776, 883) # 1280*720
+        cv2.imwrite(filename, dewarp_img)
+    	h, w, l = dewarp_img.shape
+    	print(w, h)
+	out.write(dewarp_img)
+    	time.sleep(1)
 
+    c = cv2.waitKey(7) % 0x100
+    if c == 27 or c == 10:
+        print('Stop recording..')
+        break 
  
+out.release()
 
